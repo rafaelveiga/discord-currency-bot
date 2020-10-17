@@ -1,10 +1,8 @@
-import { rejects } from "assert";
 import * as discord from "discord.js";
-import { resolve } from "path";
 import { BotMessage } from "./BotMessage";
+import CoinFlipCommand from "./commands/CoinFlip";
 import GetBalanceCommand from "./commands/GetBalance";
 import RegisterCommand from "./commands/Register";
-import { BotCommand } from "./structures/BotCommand";
 
 export class Bot {
   private client: discord.Client;
@@ -24,17 +22,17 @@ export class Bot {
         if (message.author.id !== this.botId) {
           const GetBalance: GetBalanceCommand = new GetBalanceCommand(this);
           const Register: RegisterCommand = new RegisterCommand(this);
+          const CoinFlip: CoinFlipCommand = new CoinFlipCommand(this);
           const botMessage: discord.MessageEmbed = new BotMessage().get();
 
-          if (GetBalance.isValid(message.cleanContent)) {
-            await GetBalance.execute(message, botMessage);
-            message.reply({ embed: botMessage });
-          }
+          const commands = [GetBalance, Register, CoinFlip];
 
-          if (Register.isValid(message.cleanContent)) {
-            await Register.execute(message, botMessage);
-            message.reply({ embed: botMessage });
-          }
+          commands.forEach(async (command) => {
+            if (command.isValid(message.cleanContent)) {
+              await command.execute(message, botMessage);
+              message.reply({ embed: botMessage });
+            }
+          });
         }
       }
     );
