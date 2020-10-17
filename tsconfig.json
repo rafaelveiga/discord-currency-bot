@@ -5,9 +5,6 @@
     "outDir": "dist",
     "lib": ["ES6"],
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-    },
     "esModuleInterop": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
