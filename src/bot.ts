@@ -1,32 +1,44 @@
+import { rejects } from "assert";
 import * as discord from "discord.js";
+import { resolve } from "path";
+import { BotMessage } from "./BotMessage";
 import GetBalanceCommand from "./commands/GetBalance";
+import RegisterCommand from "./commands/Register";
 import { BotCommand } from "./structures/BotCommand";
 
 export class Bot {
   private client: discord.Client;
+  public botId: string = null;
 
-  public start(): void {
+  public async start(): Promise<void> {
     this.client = new discord.Client();
-    this.loadCommands();
-    this.registerListeners();
-    this.client.login(process.env.DISCORD_BOT_TOKEN);
-  }
 
-  private registerListeners(): void {
     this.client.on("ready", () => {
-      console.log("> Bot login successful");
+      this.botId = this.client.user.id;
+      console.log("> Bot login");
     });
 
-    this.client.on("message", this.onMessage);
-  }
+    this.client.on(
+      "message",
+      async (message: discord.Message): Promise<void> => {
+        if (message.author.id !== this.botId) {
+          const GetBalance: GetBalanceCommand = new GetBalanceCommand(this);
+          const Register: RegisterCommand = new RegisterCommand(this);
+          const botMessage: discord.MessageEmbed = new BotMessage().get();
 
-  private loadCommands(): void {}
+          if (GetBalance.isValid(message.cleanContent)) {
+            await GetBalance.execute(message, botMessage);
+            message.reply({ embed: botMessage });
+          }
 
-  private onMessage(message: discord.Message): void {
-    const GetBalance: GetBalanceCommand = new GetBalanceCommand(this);
+          if (Register.isValid(message.cleanContent)) {
+            await Register.execute(message, botMessage);
+            message.reply({ embed: botMessage });
+          }
+        }
+      }
+    );
 
-    if (GetBalance.isValid(message.cleanContent)) {
-      GetBalance.execute(message);
-    }
+    this.client.login(process.env.DISCORD_BOT_TOKEN);
   }
 }

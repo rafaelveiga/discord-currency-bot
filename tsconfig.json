@@ -6,6 +6,9 @@
     "lib": ["ES6"],
     "baseUrl": ".",
     "esModuleInterop": true,
+    "paths": {
+      "@entities/*": ["./src/entities/*"]
+    },
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
   },

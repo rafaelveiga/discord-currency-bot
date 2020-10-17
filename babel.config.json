@@ -17,7 +17,7 @@
       "module-resolver", {
         "root": ["./"],
         "alias": {
-          "@": "./src"
+          "@entities": "./src/entities"
         }
       }
     ]
