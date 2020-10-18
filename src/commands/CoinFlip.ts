@@ -9,6 +9,10 @@ export default class CoinFlipCommand implements BotCommand {
 
   constructor(bot: Bot) {}
 
+  getHelp(botMessage: MessageEmbed) {
+    return botMessage;
+  }
+
   isValid(msg: string): boolean {
     const regExp = /[$]coin\b/g;
 

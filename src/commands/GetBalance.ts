@@ -6,6 +6,10 @@ import { BotCommand } from "src/structures/BotCommand";
 export default class GetBalanceCommand implements BotCommand {
   constructor(bot: Bot) {}
 
+  getHelp(botMessage: MessageEmbed) {
+    return botMessage;
+  }
+
   async execute(msg: Message, botMessage: MessageEmbed): Promise<MessageEmbed> {
     const discordUser: DiscordUser = msg.member.user;
 

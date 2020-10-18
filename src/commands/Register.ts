@@ -13,6 +13,12 @@ export default class RegisterCommand implements BotCommand {
     return regExp.test(msg);
   }
 
+  getHelp(botMessage: MessageEmbed) {
+    const message = "Create your currency account on this server.";
+
+    return botMessage.setDescription(message);
+  }
+
   async execute(msg: Message, botMessage: MessageEmbed): Promise<MessageEmbed> {
     const discordUser: DiscordUser = msg.member.user;
 
