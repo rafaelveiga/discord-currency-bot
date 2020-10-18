@@ -15,16 +15,63 @@ export default class CoinFlipCommand implements BotCommand {
     return regExp.test(msg);
   }
 
-  validateArgs(commandArgs): boolean {
-    const betTotal = commandArgs[1];
+  private async validateArgs(
+    commandArgs,
+    message: Message
+  ): Promise<CoinFlipValidationResult> {
+    const betTotal = parseInt(commandArgs[1], 10);
+    const betSubject = parseInt(commandArgs[2], 10);
 
-    if (parseInt(betTotal) === NaN) {
-      return false;
+    if (isNaN(betSubject) || betSubject > 1 || betSubject < 0) {
+      return { error: "Aposta não válida" };
     }
 
-    // this.userRepository.findOne({ where: })
+    if (isNaN(betTotal)) {
+      return { error: "Valor de aposta não é um número" };
+    }
 
-    return true;
+    const user = await this.userRepository.findOne({
+      where: { discordId: message.author.id },
+    });
+
+    if (!user) {
+      return { error: "Usuário não encontrado" };
+    }
+
+    if (user.balance < betTotal) {
+      return { error: "Usuário não possui saldo suficiente" };
+    }
+
+    return {
+      error: null,
+      parsedArguments: {
+        betTotal,
+        betSubject,
+      },
+    };
+  }
+
+  private flipCoin(): number {
+    return Math.random() >= 0.5 ? 1 : 0;
+  }
+
+  private async setBalance(
+    betResult: boolean,
+    userId,
+    parsedArguments: CoinFlipParsedArguments
+  ): Promise<void> {
+    const balanceChange = betResult
+      ? parsedArguments.betTotal
+      : -parsedArguments.betTotal;
+
+    const userData = await this.userRepository.findOne({
+      where: { discordId: userId },
+    });
+
+    await this.userRepository.update(
+      { discordId: userId },
+      { balance: userData.balance + balanceChange }
+    );
   }
 
   async execute(
@@ -32,15 +79,31 @@ export default class CoinFlipCommand implements BotCommand {
     botMessage: MessageEmbed
   ): Promise<MessageEmbed> {
     const commandArgs = message.cleanContent.split(" ");
+    const argsValidation: CoinFlipValidationResult = await this.validateArgs(
+      commandArgs,
+      message
+    );
 
-    console.log(commandArgs);
-
-    if (!this.validateArgs(commandArgs)) {
-      return botMessage.setDescription(
-        "Ocorreu um erro. Por favor tente novamente"
-      );
+    // Validate arguments
+    if (argsValidation.error) {
+      return botMessage.setDescription(argsValidation.error);
     }
 
-    return botMessage.setDescription("aoba");
+    // Flip Coin
+    const flipResult = this.flipCoin();
+    const betWon = flipResult === argsValidation.parsedArguments.betSubject;
+
+    // Adjust balance
+    await this.setBalance(
+      betWon,
+      message.author.id,
+      argsValidation.parsedArguments
+    );
+
+    if (betWon) {
+      return botMessage.setDescription("Bet won");
+    }
+
+    return botMessage.setDescription("betLost");
   }
 }
