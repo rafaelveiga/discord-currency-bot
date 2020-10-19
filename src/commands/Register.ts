@@ -8,7 +8,7 @@ export default class RegisterCommand implements BotCommand {
   constructor(bot: Bot) {}
 
   isValid(msg: string): boolean {
-    const regExp = /[$]register\b/g;
+    const regExp = /^[$]register\b/g;
 
     return regExp.test(msg);
   }

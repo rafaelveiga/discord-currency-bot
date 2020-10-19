@@ -27,7 +27,7 @@ export default class GetBalanceCommand implements BotCommand {
   }
 
   isValid(msg: string) {
-    const regExp = /[$]balance\b/g;
+    const regExp = /^[$]balance\b/g;
 
     return regExp.test(msg);
   }

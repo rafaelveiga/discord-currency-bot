@@ -14,7 +14,7 @@ export default class CoinFlipCommand implements BotCommand {
   }
 
   isValid(msg: string): boolean {
-    const regExp = /[$]coin\b/g;
+    const regExp = /^[$]coin\b/g;
 
     return regExp.test(msg);
   }
